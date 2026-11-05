@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const errorHandler = require('./middleware/errorHandler');
+const { connectDB } = require('./utils/db');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -35,12 +36,7 @@ app.use(errorHandler);
 // Database connection & Server start
 const startServer = async () => {
   try {
-    const mongoUri = process.env.MONGODB_URI;
-    if (!mongoUri) {
-      throw new Error('MONGODB_URI is not defined in environment variables');
-    }
-
-    await mongoose.connect(mongoUri);
+    await connectDB();
     console.log('MongoDB connected successfully');
 
     app.listen(PORT, () => {

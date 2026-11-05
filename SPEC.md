@@ -84,6 +84,7 @@ Review {
 | POST | /api/auth/register | Create user, send verification email |
 | POST | /api/auth/login | Return JWT |
 | GET | /api/auth/verify-email?token= | Mark email verified |
+| POST | /api/auth/resend-verification | Resend verification email (rate-limited, unverified users only) |
 | GET | /api/users/me | Current user |
 | PUT | /api/users/me | Update profile and skills |
 | GET | /api/users/:id | Public profile |
@@ -130,12 +131,13 @@ if (!slot) return res.status(409).json({ message: 'Slot already booked' });
 ## Security and validation
 - Hash passwords with bcrypt. Never return `passwordHash`.
 - Auth middleware verifies JWT; role middleware protects admin routes.
-- Email verification: Signed JWT with `purpose: 'verify'` claim and 24h expiry (no new fields on User model). Ethereal in development.
+- Email verification: Signed JWT with `purpose: 'verify'` claim and 24h expiry (no new fields on User model). Ethereal in development. Rate-limited resend endpoint (`POST /api/auth/resend-verification`) sends fresh 24h link to unverified users only. `previewUrl` is returned only in development mode.
 - Block unverified users from creating slots or requests.
 - Validate all request bodies with zod.
 - Rate-limit `/api/auth/*`.
 - Central error handler; consistent JSON error shape `{ message }`.
 - CORS restricted to the deployed frontend origin.
+- Environment separation: Tests must run against an isolated test database (`MONGODB_TEST_URI`) and never touch the main database.
 
 ## Build order (one feature at a time)
 1. Project setup, Mongoose connection, User model, register/login, auth middleware
